@@ -1,26 +1,24 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+// main.ts
 import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Mengaktifkan ValidationPipe global untuk validasi DTO
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true, // Hapus properti yang tidak ada di DTO
-      forbidNonWhitelisted: true, // Memberikan error jika ada properti yang tidak diizinkan
-      transform: true, // Mengubah payload masuk menjadi instance DTO
-    }),
-  );
+  // Global Validation Pipe
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
-  // Mengaktifkan CORS untuk pengembangan
-  app.enableCors();
-
-  // Aktifkan graceful shutdown hooks.
-  // Ini akan memastikan NestJS memanggil onModuleDestroy()
-  // pada provider yang sesuai saat aplikasi menerima sinyal shutdown (misalnya SIGTERM).
-  app.enableShutdownHooks();
+  // Swagger setup
+  const config = new DocumentBuilder()
+    .setTitle('Nest CRUD API')
+    .setDescription('API with Auth, CRUD, Image Upload, Swagger, Testing')
+    .setVersion('1.0.0')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
 
   await app.listen(3000);
 }
