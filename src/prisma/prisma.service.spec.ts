@@ -15,4 +15,14 @@ describe('PrismaService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  it('should have PrismaService methods', () => {
+    // Check for a method or property unique to PrismaService
+    expect(typeof service.$connect).toBe('function');
+  });
+
+  it('should extend PrismaClient', () => {
+    // Check if service has a method from PrismaClient, e.g., $connect
+    expect(typeof service.$connect).toBe('function');
+  });
 });

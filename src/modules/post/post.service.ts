@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class PostService {
@@ -27,8 +27,14 @@ export class PostService {
     });
   }
 
-  findOne(id: number) {
-    return this.prisma.post.findUnique({ where: { id } });
+  async findOne(id: number) {
+    const post = await this.prisma.post.findUnique({ where: { id } });
+
+    if (!post) {
+      throw new NotFoundException(`Post with ID ${id} not found`);
+    }
+
+    return post;
   }
 
   async update(id: number, dto: UpdatePostDto, imageFilename?: string) {
