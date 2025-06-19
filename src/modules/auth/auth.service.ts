@@ -7,11 +7,12 @@ import { AuthDto } from './dto/auth.dto';
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
-    private jwt: JwtService,
+    private readonly prisma: PrismaService,
+    private readonly jwt: JwtService,
   ) {}
 
-  async signup(dto: AuthDto) {
+  // 🔒 Tetapkan konteks this agar tidak unbound
+  async signup(this: AuthService, dto: AuthDto) {
     const hash = await bcrypt.hash(dto.password, 10);
 
     try {
@@ -22,13 +23,13 @@ export class AuthService {
         },
       });
 
-      return this.signToken(user.id, user.email);
+      return await this.signToken(user.id, user.email);
     } catch {
       throw new ForbiddenException('Email already exists');
     }
   }
 
-  async signin(dto: AuthDto) {
+  async signin(this: AuthService, dto: AuthDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -36,19 +37,19 @@ export class AuthService {
     if (!user) throw new ForbiddenException('Invalid credentials');
 
     const pwMatches = await bcrypt.compare(dto.password, user.password);
-
     if (!pwMatches) throw new ForbiddenException('Invalid credentials');
 
-    return this.signToken(user.id, user.email);
+    return await this.signToken(user.id, user.email);
   }
 
   async signToken(
+    this: AuthService,
     userId: number,
     email: string,
   ): Promise<{ access_token: string }> {
     const payload = { sub: userId, email };
     const token = await this.jwt.signAsync(payload, {
-      secret: process.env.JWT_SECRET,
+      secret: process.env.JWT_SECRET || 'default-secret',
       expiresIn: '1h',
     });
 
