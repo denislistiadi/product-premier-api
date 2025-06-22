@@ -34,11 +34,11 @@ if (!fs.existsSync(UPLOAD_DIR)) {
 
 @ApiTags('Posts')
 @ApiBearerAuth()
-@UseGuards(JwtGuard)
 @Controller('posts')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
+  @UseGuards(JwtGuard)
   @Post()
   @UseInterceptors(
     FileInterceptor('image', {
@@ -59,13 +59,10 @@ export class PostController {
       filename = `${uuid()}.webp`;
       const UPLOAD_DIR = path.resolve(process.cwd(), 'uploads');
       const outputPath = path.join(UPLOAD_DIR, filename);
-
       await sharp(image.buffer)
         .resize(800)
         .webp({ quality: 75 })
         .toFile(outputPath);
-
-      console.log(outputPath, 'output');
     }
 
     return this.postService.create(req.user.sub, dto, filename);
@@ -81,6 +78,7 @@ export class PostController {
     return this.postService.findOne(id);
   }
 
+  @UseGuards(JwtGuard)
   @Patch(':id')
   @UseInterceptors(
     FileInterceptor('image', {
@@ -110,6 +108,7 @@ export class PostController {
     return this.postService.update(id, dto, filename);
   }
 
+  @UseGuards(JwtGuard)
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.postService.remove(id);
