@@ -40,7 +40,9 @@ describe('PostController', () => {
 
   describe('create', () => {
     it('should create a post without image', async () => {
-      const req: AuthRequest = { user: { sub: 1 } } as AuthRequest;
+      const req: AuthRequest = {
+        user: { sub: 1, email: 'example@mail.com' },
+      } as AuthRequest;
       const dto: CreatePostDto = { title: 'Test', content: 'Content' };
       postService.create.mockResolvedValue('created');
 
